@@ -10,4 +10,5 @@ public class SearchProduct {
     private String productName;
     private Long colorId;
     private Long variantId;
+    private String imageUrl;
 }

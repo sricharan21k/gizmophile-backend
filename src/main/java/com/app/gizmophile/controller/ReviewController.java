@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.net.MalformedURLException;
+import java.net.Socket;
 import java.util.List;
 
 @RestController
@@ -78,6 +79,7 @@ public class ReviewController {
 
     @PatchMapping("/{reviewId}/like")
     public Integer likeReview(@PathVariable Long reviewId) {
+        System.out.println("revId "+reviewId);
         return reviewService.likeReview(reviewId);
     }
 

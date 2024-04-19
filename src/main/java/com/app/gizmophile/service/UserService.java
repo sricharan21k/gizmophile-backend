@@ -150,7 +150,7 @@ public class UserService {
 
     }
 
-    public String updateProfile(MultipartFile image, String username) {
+    public boolean updateProfile(MultipartFile image, String username) {
         User user = userRepository.findByUsername(username).orElseThrow();
 
         if (!image.isEmpty()) {
@@ -165,13 +165,16 @@ public class UserService {
                 Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
                 user.setProfileImage(originalFilename);
+                userRepository.save(user);
+                return true;
             } catch (IOException e) {
-                throw new RuntimeException("Failed to save image", e);
+                return false;
+//                throw new RuntimeException("Failed to save image", e);
             }
+
         }
-        String profile = userRepository.save(user).getProfileImage();
-        System.out.println("profile " + profile);
-        return user.getProfileImage();
+        return false;
+
     }
 
     public Resource getImage(String username) throws MalformedURLException {
@@ -245,26 +248,6 @@ public class UserService {
 
         user.getOrders().add(newOrder);
         Order order = userRepository.save(user).getOrders().getLast();
-
-//        List<OrderItemData> orderItemDataList = new ArrayList<>();
-//        for (OrderItem orderItem : order.getItems()) {
-//            OrderItemData orderItemData = OrderItemData.builder().itemValue(orderItem.getItemValue())
-//                    .quantity(orderItem.getQuantity())
-//                    .item(orderItem.getItem().getId())
-//                    .build();
-//            orderItemDataList.add(orderItemData);
-//        }
-//        return OrderData.builder()
-//                .id(order.getId())
-//                .orderId(order.getOrderId())
-//                .orderAmount(order.getOrderAmount())
-//                .orderDate(order.getOrderDate())
-//                .shippingAddress(order.getShippingAddress().getId())
-//                .paymentMode(order.getPaymentMode())
-//                .status(order.getStatus().name())
-//                .items(orderItemDataList)
-//                .deliveryDate(order.getDeliveryDate())
-//                .build();
         return order.getId();
     }
 
@@ -298,9 +281,9 @@ public class UserService {
                         .returnReason(orderItem.getReturnReason())
                         .replaceReason(orderItem.getReplaceReason())
                         .rating(orderItem.getReview() != null && orderItem.getReview().getRating() != null ? orderItem.getReview().getRating() : 0)
-                        .image(orderItem.getItem().getColors().stream()
+                        .imageUrl(orderItem.getItem().getColors().stream()
                                 .filter(productColor -> Objects.equals(productColor.getColor(), orderItem.getItemColor()))
-                                .findFirst().orElseThrow().getId())
+                                .findFirst().orElseThrow().getImage())
                         .isReviewed(isReviewed)
                         .reviewId(orderItem.getReview() != null ? orderItem.getReview().getId() : null)
                         .build();
@@ -344,9 +327,9 @@ public class UserService {
                     .item(orderItem.getItem().getId())
                     .type(orderItem.getItem().getType())
                     .itemName(orderItem.getItem().getBrand() + " " + orderItem.getItem().getModel())
-                    .image(orderItem.getItem().getColors().stream()
+                    .imageUrl(orderItem.getItem().getColors().stream()
                             .filter(productColor -> Objects.equals(productColor.getColor(), orderItem.getItemColor()))
-                            .findFirst().orElseThrow().getId())
+                            .findFirst().orElseThrow().getImage())
                     .color(orderItem.getItemColor())
                     .variant(orderItem.getItemVariant())
                     .price(orderItem.getItemValue())
@@ -545,7 +528,7 @@ public class UserService {
             case "wishlistItem" -> user.getWishlistItems().add(item);
             case "browsedItem" -> {
                 var size = user.getBrowsedItems().size();
-                if (size == 6) {
+                if (size == 8) {
                     user.getBrowsedItems().removeFirst();
                 }
                 user.getBrowsedItems().add(item);

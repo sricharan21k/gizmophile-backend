@@ -55,7 +55,7 @@ public class UserController {
     }
 
     @PostMapping("/{username}/profile-image")
-    public String updateProfile(@RequestParam("profileImage") MultipartFile image, @PathVariable String username) {
+    public boolean updateProfile(@RequestParam("profileImage") MultipartFile image, @PathVariable String username) {
         return userService.updateProfile(image, username);
     }
 

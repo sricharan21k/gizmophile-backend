@@ -21,7 +21,7 @@ public class OrderItemData {
     private String replaceReason;
     private Double price;
     private Double itemValue;
-    private Long image;
+    private String imageUrl;
     private Boolean isReviewed;
     private Long reviewId;
 

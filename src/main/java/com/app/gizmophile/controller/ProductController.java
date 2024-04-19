@@ -89,6 +89,11 @@ public class ProductController {
         return productService.getProduct(productId);
     }
 
+    @GetMapping("base-product/{productId}")
+    public SearchProduct getBaseProduct(@PathVariable Long productId) {
+        return productService.getBaseProduct(productId);
+    }
+
     @GetMapping("/product-variant/{variantId}")
     public ProductVariantData getProductVariant(@PathVariable Long variantId){
         return productService.getVariant(variantId);
@@ -97,6 +102,11 @@ public class ProductController {
     @GetMapping("/product-color/{colorId}")
     public ProductColorData getProductColor(@PathVariable Long colorId){
         return productService.getColor(colorId);
+    }
+
+    @GetMapping("/product-color/{colorId}/image-url")
+    public String getProductImageUrl(@PathVariable Long colorId){
+        return productService.getColor(colorId).getImage();
     }
 
     @GetMapping("/product-image/{colorId}")

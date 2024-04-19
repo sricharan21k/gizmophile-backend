@@ -93,6 +93,18 @@ public class ProductService {
         return productData;
     }
 
+    public SearchProduct getBaseProduct(Long productId){
+        Product product = productRepository.findById(productId).orElseThrow();
+        ProductColor productColor = productColorRepository.findById(product.getColors().getFirst().getId()).orElseThrow();
+        return SearchProduct.builder()
+                .productId(product.getId())
+                .productName(product.getBrand() + " " + product.getModel())
+                .colorId(product.getColors().getFirst().getId())
+                .variantId(product.getVariants().getFirst().getId())
+                .imageUrl(productColor.getImage())
+                .build();
+    }
+
     public List<ProductData> mapProductsToProductData(List<Product> products) {
         List<ProductData> productDataList = new ArrayList<>();
 
@@ -122,11 +134,13 @@ public class ProductService {
     public List<SearchProduct> mapProductToSearchProduct(List<Product> products) {
         List<SearchProduct> searchProducts = new ArrayList<>();
         products.forEach(product -> {
+            ProductColor productColor = productColorRepository.findById(product.getColors().getFirst().getId()).orElseThrow();
             SearchProduct searchProduct = SearchProduct.builder()
                     .productId(product.getId())
                     .productName(product.getBrand() + " " + product.getModel())
                     .colorId(product.getColors().getFirst().getId())
                     .variantId(product.getVariants().getFirst().getId())
+                    .imageUrl(productColor.getImage())
                     .build();
             searchProducts.add(searchProduct);
         });
@@ -147,6 +161,7 @@ public class ProductService {
         return ProductColorData.builder().id(productColor.getId())
                 .productId(productColor.getProduct().getId())
                 .color(productColor.getColor())
+                .image(productColor.getImage())
                 .build();
     }
 

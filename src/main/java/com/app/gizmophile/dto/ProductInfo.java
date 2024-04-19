@@ -19,7 +19,7 @@ public class ProductInfo {
     private String productName;
     private String productColor;
     private String productVariant;
-    private Long productImage;
+    private String productImage;
     private String description;
     private Integer stock;
     private Integer orderCount;

@@ -82,6 +82,9 @@ public class ReviewService {
 
             String productName = review.getProduct().getBrand()
                     + " " + review.getProduct().getModel();
+            String productImage = review.getProduct().getColors().stream()
+                    .filter(productColor -> Objects.equals(productColor.getColor(), review.getOrderItem().getItemColor()))
+                    .findFirst().orElseThrow().getImage();
 
             ProductInfo product = ProductInfo.builder()
                     .productId(review.getProduct().getId())
@@ -89,7 +92,7 @@ public class ReviewService {
                     .productName(productName)
                     .productColor(review.getOrderItem().getItemColor())
                     .productVariant(review.getOrderItem().getItemVariant())
-//                    .productImage(productImage)
+                    .productImage(productImage)
                     .build();
 
             ReviewData reviewData = ReviewData.builder()
@@ -126,7 +129,7 @@ public class ReviewService {
                 .productVariant(review.getOrderItem().getItemVariant())
                 .productImage(review.getProduct().getColors().stream()
                         .filter(productColor -> Objects.equals(productColor.getColor(), review.getOrderItem().getItemColor()))
-                        .findFirst().orElseThrow().getId()).build();
+                        .findFirst().orElseThrow().getImage()).build();
 
 
         return ReviewData.builder()
@@ -144,11 +147,12 @@ public class ReviewService {
     }
 
     public Double getRating(Long productId) {
-        return productRepository.findById(productId).orElseThrow().getReviews().stream()
+        Product product = productRepository.findById(productId).orElseThrow();
+        boolean productRated = (product.getRating() == null) || (product.getRating() == 0);
+        return product.getReviews().stream()
                 .filter(review -> review != null && review.getRating() != null)
                 .mapToDouble(Review::getRating)
-                .average()
-                .orElse(0D);
+                .sum();
     }
 
     public List<ReplyData> getReplies(Long reviewId) {
@@ -222,9 +226,12 @@ public class ReviewService {
 
         Product product = productRepository.findById(orderItem.getItem().getId()).orElseThrow();
         int reviewCount = !product.getReviews().isEmpty() ? product.getReviews().size() : 0;
+        System.out.println("review count: "+reviewCount);
         double averageRating = (getRating(product.getId()) + request.getRating()) / (reviewCount + 1);
+        System.out.println("avg rating: "+averageRating);
         var ratingCorrectedToSingleDecimalPlace = new BigDecimal(averageRating)
                 .setScale(1, RoundingMode.HALF_UP).doubleValue();
+        System.out.println("rating corrected: "+ratingCorrectedToSingleDecimalPlace);
 
         product.setRating(ratingCorrectedToSingleDecimalPlace);
         productRepository.save(product);
@@ -302,8 +309,10 @@ public class ReviewService {
 
 
     public Integer likeReview(Long reviewId) {
-        Review review = reviewRepository.findById(reviewId).get();
-        review.setLikes(review.getLikes() + 1);
+        Review review = reviewRepository.findById(reviewId).orElseThrow();
+        int likes = review.getLikes() == null ? 1 : review.getLikes() + 1;
+        review.setLikes(likes);
+        System.out.println("likes " + review.getLikes());
         reviewRepository.save(review);
         return review.getLikes();
     }

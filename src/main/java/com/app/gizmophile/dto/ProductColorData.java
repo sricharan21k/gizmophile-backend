@@ -13,4 +13,5 @@ public class ProductColorData {
     private Long id;
     private Long productId;
     private String color;
+    private String image;
 }
